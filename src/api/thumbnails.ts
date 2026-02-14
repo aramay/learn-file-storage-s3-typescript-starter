@@ -37,6 +37,8 @@ export async function handlerGetThumbnail(cfg: ApiConfig, req: BunRequest) {
 }
 
 export async function handlerUploadThumbnail(cfg: ApiConfig, req: BunRequest) {
+  const MAX_UPLOAD_SIZE: number = 10 << 20;
+
   const { videoId } = req.params as { videoId?: string };
   if (!videoId) {
     throw new BadRequestError("Invalid video ID");
@@ -48,6 +50,24 @@ export async function handlerUploadThumbnail(cfg: ApiConfig, req: BunRequest) {
   console.log("uploading thumbnail for video", videoId, "by user", userID);
 
   // TODO: implement the upload here
+  const formData = await req.formData()
+  console.log("formData ", formData);
+  const thumbnail = formData.get("thumbnail")
+  console.log("thumbnail ", thumbnail)
+
+
+  if (!(thumbnail instanceof File)) {
+    throw new BadRequestError("Could not get thumbnail file")
+  }
+
+  if (thumbnail.size > MAX_UPLOAD_SIZE) { throw new BadRequestError("File size too big!") }
+
+  const mediaType = thumbnail.type;
+
+  const data = await thumbnail.arrayBuffer();
+
+  console.log("data ", data.byteLength)
+  console.log(new Uint8Array(data).slice(0,8))
 
   return respondWithJSON(200, null);
 }
