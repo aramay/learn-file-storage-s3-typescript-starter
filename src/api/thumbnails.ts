@@ -4,6 +4,7 @@ import { getVideo, updateVideo } from "../db/videos";
 import type { ApiConfig } from "../config";
 import type { BunRequest } from "bun";
 import { BadRequestError, NotFoundError, UserForbiddenError } from "./errors";
+import path from "path";
 
 type Thumbnail = {
   data: ArrayBuffer;
@@ -66,24 +67,54 @@ export async function handlerUploadThumbnail(cfg: ApiConfig, req: BunRequest) {
 
   const data = await thumbnail.arrayBuffer();
 
+  // no longer needed
+  // const base64Data = Buffer.from(data).toString("base64")
+
+  // const base64Data = buff.toString("base64")
+  
   console.log("data bytelength ", data.byteLength)
   console.log("data ", data.byteLength)
   console.log(new Uint8Array(data).slice(0,8))
 
   const video = getVideo(cfg.db, videoId)
 
+  
+  
   if (!video) {
-    throw new NotFoundError("Could not video ")
+    throw new NotFoundError("Could not video")
   }
 
   if (video.userID !== userID) {
     throw new UserForbiddenError("Not authorized")
   }
 
-  videoThumbnails.set(videoId, {data, mediaType})
+  
+  // /assets/<videoID>.<file_extension>.
+  cfg.assetsRoot
+  videoId
+  mediaType
+  
+  // const filePath = `${cfg.assetsRoot}/${videoId}.${mediaType}`
 
-  video.thumbnailURL = `http://localhost:${cfg.port}/api/thumbnails/${videoId}`
+  const filePath = path.join(`${cfg.assetsRoot}`, `${videoId}.png`)
 
+  console.log("filepath ", filePath)
+
+  // const encoder = new TextEncoder()
+  // const dToWrite = encoder.encode(base64Data)
+
+  await Bun.write(filePath, thumbnail)
+  // data:<media-type>;base64,<data>
+
+  // video.thumbnailURL = `data:${mediaType};base64,${base64Data}`
+  
+  // videoThumbnails.set(videoId, {data, mediaType})
+
+  // video.thumbnailURL = `http://localhost:${cfg.port}/api/thumbnails/${videoId}`
+
+  video.thumbnailURL = `http://localhost:${cfg.port}/assets/${videoId}.png`
+
+  // console.log("video ", video)
   updateVideo(cfg.db, video)
 
   return respondWithJSON(200, video);
