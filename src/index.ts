@@ -2,7 +2,6 @@ import { cfg } from "./config";
 import { handlerLogin, handlerRefresh, handlerRevoke } from "./api/auth";
 import {
   errorHandlingMiddleware,
-  cacheMiddleware,
   withConfig,
   noCacheMiddleware,
 } from "./api/middleware";
