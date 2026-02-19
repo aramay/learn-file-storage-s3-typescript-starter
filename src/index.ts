@@ -4,6 +4,7 @@ import {
   errorHandlingMiddleware,
   cacheMiddleware,
   withConfig,
+  noCacheMiddleware,
 } from "./api/middleware";
 import { handlerUsersCreate } from "./api/users";
 import {
@@ -64,7 +65,7 @@ Bun.serve({
     const path = url.pathname;
 
     if (path.startsWith("/assets")) {
-      return cacheMiddleware(() =>
+      return noCacheMiddleware(() =>
         serveStaticFile(path.replace("/assets/", ""), cfg.assetsRoot)
       )(req);
     }
