@@ -4,7 +4,7 @@ import { getVideo, updateVideo } from "../db/videos";
 import type { ApiConfig } from "../config";
 import type { BunRequest } from "bun";
 import { BadRequestError, NotFoundError, UserForbiddenError } from "./errors";
-import path from "path";
+import { getAssetDiskPath, getAssetURL, mediaTypeToExt } from "./assets";
 
 type Thumbnail = {
   data: ArrayBuffer;
@@ -63,8 +63,6 @@ export async function handlerUploadThumbnail(cfg: ApiConfig, req: BunRequest) {
 
   if (thumbnail.size > MAX_UPLOAD_SIZE) { throw new BadRequestError("File size too big!") }
 
-  const mediaType = thumbnail.type;
-
   const data = await thumbnail.arrayBuffer();
 
   // no longer needed
@@ -88,31 +86,23 @@ export async function handlerUploadThumbnail(cfg: ApiConfig, req: BunRequest) {
     throw new UserForbiddenError("Not authorized")
   }
 
+
+
+  const fileExtension = mediaTypeToExt(thumbnail.type);
+
+  const filename = `${videoId}${fileExtension}`
+
+  const assetDiskPath = getAssetDiskPath(cfg, filename)
   
-  // /assets/<videoID>.<file_extension>.
-  cfg.assetsRoot
-  videoId
-  mediaType
-  
-  // const filePath = `${cfg.assetsRoot}/${videoId}.${mediaType}`
 
-  const filePath = path.join(`${cfg.assetsRoot}`, `${videoId}.png`)
+  console.log("filepath ", assetDiskPath)
 
-  console.log("filepath ", filePath)
 
-  // const encoder = new TextEncoder()
-  // const dToWrite = encoder.encode(base64Data)
+  await Bun.write(assetDiskPath, data)
 
-  await Bun.write(filePath, thumbnail)
-  // data:<media-type>;base64,<data>
+  const urlPath = getAssetURL(cfg, filename)
 
-  // video.thumbnailURL = `data:${mediaType};base64,${base64Data}`
-  
-  // videoThumbnails.set(videoId, {data, mediaType})
-
-  // video.thumbnailURL = `http://localhost:${cfg.port}/api/thumbnails/${videoId}`
-
-  video.thumbnailURL = `http://localhost:${cfg.port}/assets/${videoId}.png`
+  video.thumbnailURL = urlPath
 
   // console.log("video ", video)
   updateVideo(cfg.db, video)
