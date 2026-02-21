@@ -4,7 +4,7 @@ import { getVideo, updateVideo } from "../db/videos";
 import type { ApiConfig } from "../config";
 import type { BunRequest } from "bun";
 import { BadRequestError, NotFoundError, UserForbiddenError } from "./errors";
-import { getAssetDiskPath, getAssetURL, mediaTypeToExt } from "./assets";
+import { getAssetDiskPath, getAssetURL, getBase64FileName, mediaTypeToExt } from "./assets";
 
 type Thumbnail = {
   data: ArrayBuffer;
@@ -88,23 +88,27 @@ export async function handlerUploadThumbnail(cfg: ApiConfig, req: BunRequest) {
 
 
 
+  const filename = await getBase64FileName()
+
   const fileExtension = mediaTypeToExt(thumbnail.type);
 
-  const filename = `${videoId}${fileExtension}`
+  const filePath = `${filename}${fileExtension}`
 
-  const assetDiskPath = getAssetDiskPath(cfg, filename)
-  
+  console.log("filepath ", filePath)
 
-  console.log("filepath ", assetDiskPath)
+  // const filename = `${videoId}${fileExtension}`
 
+  const assetDiskPath = getAssetDiskPath(cfg, filePath)
+
+  console.log("assetDiskPath ", assetDiskPath)
 
   await Bun.write(assetDiskPath, data)
 
-  const urlPath = getAssetURL(cfg, filename)
+  const urlPath = getAssetURL(cfg, filePath)
 
   video.thumbnailURL = urlPath
 
-  // console.log("video ", video)
+  console.log("video ", video)
   updateVideo(cfg.db, video)
 
   return respondWithJSON(200, video);

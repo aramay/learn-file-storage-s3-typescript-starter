@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync } from "fs";
 import type { ApiConfig } from "../config";
 import path from "path";
+import { randomBytes } from "crypto";
 
 export function ensureAssetsDir(cfg: ApiConfig) {
   if (!existsSync(cfg.assetsRoot)) {
@@ -44,4 +45,17 @@ export function getAssetURL(cfg: ApiConfig, filePath: string) {
   // `http://localhost:${cfg.port}/assets/${videoId}${fileExtension}`
 
   return `http://localhost:${cfg.port}/assets/${filePath}`
+}
+
+export async function getBase64FileName() {
+  try {
+    const buff = randomBytes(32)
+    let base64FileName = buff.toString("base64")
+
+    console.log("base64FileName ", base64FileName)
+    return base64FileName
+  } catch(err) {
+    console.log("Error occured ")
+    throw new Error("Error occured, failed to write bytes()")
+  }
 }
