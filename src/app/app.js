@@ -1,3 +1,7 @@
+if (import.meta.hot) {
+  // HMR APIs are available.
+  console.log("import.meta.hot")
+}
 document.addEventListener("DOMContentLoaded", async () => {
   const token = localStorage.getItem("token");
 
@@ -39,6 +43,8 @@ async function createVideoDraft() {
       body: JSON.stringify({ title, description }),
     });
     const data = await res.json();
+    console.log("data ", data)
+    // 01409fed-6699-411a-b65c-32d9beb34827
     if (!res.ok) {
       throw new Error(`Failed to create video draft: ${data.error}`);
     }
