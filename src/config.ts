@@ -27,7 +27,7 @@ const s3Region = envOrThrow("S3_REGION");
 const s3CfDistribution = envOrThrow("S3_CF_DISTRO");
 const port = envOrThrow("PORT");
 const AWS_ACCESS_KEY_ID = envOrThrow("AWS_ACCESS_KEY_ID")
-const AWS_SECRET_ACCESS_KEY = envOrThrow("AWS_SECTERT_ACCESS_KEY")
+const AWS_SECRET_ACCESS_KEY = envOrThrow("AWS_SECRET_ACCESS_KEY")
 
 const db = newDatabase(pathToDB);
 
